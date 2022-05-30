@@ -3,6 +3,7 @@ import './index.css';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 
 interface HeaderProps {
+  // eslint-disable-next-line no-unused-vars
   onSearch: (query: string) => void;
 }
 

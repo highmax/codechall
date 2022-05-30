@@ -6,6 +6,7 @@ import React, { memo, useState } from 'react';
 interface ContentProps {
   gifs: Gif[];
   loading: boolean;
+  onLoadMore: () => void;
 }
 
 interface CardProps {
@@ -57,7 +58,7 @@ const Loading = () => {
   );
 };
 
-const Content: React.FC<ContentProps> = ({ gifs, loading }) => {
+const Content: React.FC<ContentProps> = ({ gifs, loading, onLoadMore }) => {
   if (loading) return <Loading />;
   if (!gifs.length) return <NoResults />;
   return (
@@ -65,6 +66,9 @@ const Content: React.FC<ContentProps> = ({ gifs, loading }) => {
       {gifs.map((gif: Gif, idx) => (
         <Card gif={gif} key={`key-${idx}`} />
       ))}
+      <button className="load-more" onClick={onLoadMore}>
+        Load more
+      </button>
     </div>
   );
 };

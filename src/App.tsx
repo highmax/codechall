@@ -1,4 +1,4 @@
-import { requestData } from 'api';
+import { LIMIT, requestData } from 'api';
 import Content from 'components/Content';
 import Header from 'components/Header';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -21,43 +21,42 @@ export interface Gif {
 function App() {
   const [gifs, setGifs] = useState<Gif[]>([]);
   const [loading, setLoading] = useState(true);
-  const [queryText, setQueryText] = useState('');
+  const [queryText, setQueryText] = useState(
+    () => localStorage.getItem('lastQuery') || '',
+  );
+  const [offset, setOffset] = useState(0);
 
-  const loadGifs = async (query?: string, offset?: number) => {
+  const loadGifs = async () => {
     setLoading(true);
-    const data = await requestData(query, offset).catch((error) => {
+    const data = await requestData(queryText, offset).catch((error) => {
       console.error(error);
       setGifs([]);
       setLoading(false);
     });
-    setGifs(data.data);
+    setGifs([...gifs, ...data.data]);
     setLoading(false);
   };
 
   useEffect(() => {
-    const localStorageQuery = localStorage.getItem('lastQuery');
-    if (localStorageQuery !== null) {
-      loadGifs(localStorageQuery);
-    } else {
-      loadGifs();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!queryText) return;
-    setLoading(true);
-    loadGifs(queryText);
-  }, [queryText]);
+    loadGifs();
+  }, [offset, queryText]);
 
   const handleOnChange = useCallback((query: string) => {
-    if (query) setQueryText(query);
+    if (query) {
+      setGifs([]);
+      setQueryText(query);
+    }
     localStorage.setItem('lastQuery', query);
+  }, []);
+
+  const handleLoadMore = useCallback(() => {
+    setOffset((offset) => offset + LIMIT);
   }, []);
 
   return (
     <div className="App">
       <Header onSearch={handleOnChange} />
-      <Content gifs={gifs} loading={loading} />
+      <Content gifs={gifs} loading={loading} onLoadMore={handleLoadMore} />
     </div>
   );
 }
